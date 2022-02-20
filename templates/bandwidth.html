@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bandwidth Report</title>
+    <script src="https://code.jscharting.com/latest/jscharting.js"></script>
+    <script src="https://kit.fontawesome.com/d6da33d7eb.js" crossorigin="anonymous"></script>
+
+
+</head>
+<body>
+<div id="week">
+    <h2>Last Week <i id="week-caret"
+                     class="far fa-caret-square-right"
+                     onclick="toggle('week', '/week/', 'week-caret', 'Bandwidth the past Week')"></i></h2>
+    <div id="weekBW" style="width: 100%; height: 400px;"></div>
+</div>
+<script>
+    function toggle(section_id, path, caret_id, chart_name) {
+        let block = document.getElementById(section_id)
+        let caret = document.getElementById(caret_id)
+        let state = block.style.display;
+        if (state === 'block') {
+            block.style.display = 'none';
+            caret.classList.add('fa-caret-square-right');
+            caret.classList.remove('fa-caret-square-down')
+        } else {
+            // unhide the block and fetch its data
+            block.style.display = 'block';
+            caret.classList.add('fa-caret-square-down');
+            caret.classList.remove('fa-caret-square-right')
+            JSC.fetch(path)
+                .then(response => response.json())
+                .then(data => {
+                    let pings = {
+                        name: 'Ping Times',
+                        points: data.map(d => {
+                            return {x: d.test_time, y: d.ping};
+                        }),
+                        yAxis: 'rightAxis'
+                    }
+                    let upMb = {
+                        name: 'Upload Bandwidth',
+                        points: data.map(d => {
+                            return {x:d.test_time, y: d.upMb};
+                        }),
+                        yAxis: 'leftAxis'
+
+                    }
+                    let downMb = {
+                        name: 'Download Bandwidth',
+                        points: data.map(d => {
+                            return {x:d.test_time, y: d.downMb}
+                        }),
+                        yAxis: 'leftAxis'
+                    }
+                    const bandwidth_chart = new JSC.Chart(section_id+'BW', {
+                        series: [upMb, downMb, pings],
+                        xAxis: {
+                            scale: {
+                                type: 'time'
+                            },
+                            crosshair_enabled: true
+                        },
+                        yAxis: [
+                            {
+                                id: 'leftAxis',
+                                label_text: "Bandwidth (Mbps)"
+                            },
+                            {
+                                id: 'rightAxis',
+                                label_text: "Ping (ms)",
+                                orientation:"right"
+                            }
+                        ],
+                        title_label_text: "Network Health",
+                        type: 'line',
+                        debug: true,
+                    });
+                });
+        }
+    }
+</script>
+</body>
+</html>
+
