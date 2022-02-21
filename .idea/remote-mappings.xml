@@ -4,6 +4,13 @@
     <list>
       <list>
         <remote-mappings server-id="python@e60fd76d-7b8d-4548-9852-212b2b780bb0" />
+        <remote-mappings server-id="python@sshConfig://capehart@pi.internal.accapehart.com/home/capehart/.virtualenvs/speedmonitor/bin/python3">
+          <settings>
+            <list>
+              <mapping local-root="$PROJECT_DIR$" remote-root="/home/capehart/development/speedmonitor" />
+            </list>
+          </settings>
+        </remote-mappings>
       </list>
     </list>
   </component>

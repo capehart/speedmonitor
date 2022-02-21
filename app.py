@@ -41,12 +41,39 @@ def get_events_for_day(day: datetime):
         time.mktime(end.timetuple())
     )
 
-def create_point_from_item(item):
-    when =
+def make_point(lst, x_val):
+    point_mean = statistics.mean(lst)
+    point_variance = statistics.stdev(lst)
+    point_low = min(lst)
+    point_high = max(lst)
+    point = {
+        'x': x_val,
+        'y': [min(point_mean - point_variance, point_low), max(point_mean + point_variance, point_high)],
+        'subvalue': {
+            'range': [point_low, point_high]
+        }
+    }
+    return point
+    # return point_mean
 
-def make_points_from_events(events_list):
+
+def make_point_from_events(events_list):
+    point = {}
     items = [dict(item) for item in events_list]
-
+    point_time = datetime.fromtimestamp(items[0]['test_time'])
+    point_time = point_time.replace(hour=0, minute=0, second=0, microsecond=0)
+    pings = []
+    upMb_arr = []
+    downMb_arr = []
+    for item in items:
+        pings.append(item['ping'])
+        upMb_arr.append(item['upMb'])
+        downMb_arr.append(item['downMb'])
+    point['ping'] = make_point(pings, point_time)
+    point['upMb'] = make_point(upMb_arr, point_time)
+    point['downMb'] = make_point(downMb_arr, point_time)
+    point['test_time'] = point_time
+    return point
 
 @app.route('/all/')
 def return_all_points():
@@ -57,13 +84,13 @@ def return_all_points():
 @app.route('/month/')
 def return_last_30():
     num_days = 31
-    days = []
+    points = []
     now = datetime.now()
     for day_count in range(num_days):
         this_day = now - timedelta(days=day_count)
         day_events = get_events_for_day(this_day)
-        days.append(make_points_from_events(day_events))
-
+        points.append(make_point_from_events(day_events))
+    return jsonify(points)
 
 @app.route('/week/')
 def return_last_week():
@@ -75,10 +102,6 @@ def return_last_week():
     )]
     convert_timestamps(items)
     return jsonify(items)
-
-@app.route('/month/')
-def return_last_month():
-    pass
 
 @app.route('/year/')
 def return_last_year():
