@@ -7,6 +7,7 @@ import statistics
 import time
 
 from flask import Flask, render_template, jsonify
+from dateutil.relativedelta import relativedelta
 
 import pprint
 
@@ -42,10 +43,22 @@ def get_events_for_day(day: datetime):
     )
 
 def make_point(lst, x_val):
-    point_mean = statistics.mean(lst)
-    point_variance = statistics.stdev(lst)
-    point_low = min(lst)
-    point_high = max(lst)
+    try:
+        point_mean = statistics.mean(lst)
+    except statistics.StatisticsError:
+        point_mean = 0
+    try:
+        point_variance = statistics.stdev(lst)
+    except statistics.StatisticsError:
+        point_variance = 0
+    try:
+        point_low = min(lst)
+    except ValueError:
+        point_low = 0
+    try:
+        point_high = max(lst)
+    except ValueError:
+        point_high = 0
     point = {
         'x': x_val,
         'y': [min(point_mean - point_variance, point_low), max(point_mean + point_variance, point_high)],
@@ -57,15 +70,12 @@ def make_point(lst, x_val):
     # return point_mean
 
 
-def make_point_from_events(events_list):
+def make_point_from_events(item_list, point_time):
     point = {}
-    items = [dict(item) for item in events_list]
-    point_time = datetime.fromtimestamp(items[0]['test_time'])
-    point_time = point_time.replace(hour=0, minute=0, second=0, microsecond=0)
     pings = []
     upMb_arr = []
     downMb_arr = []
-    for item in items:
+    for item in item_list:
         pings.append(item['ping'])
         upMb_arr.append(item['upMb'])
         downMb_arr.append(item['downMb'])
@@ -81,6 +91,24 @@ def return_all_points():
     convert_timestamps(items)
     return jsonify(items)
 
+@app.route('/year/')
+def return_last_year():
+    points = []
+    months_back = 12
+    now = datetime.now()
+    for i in range(months_back):
+        last_month = now + relativedelta(months=-(i+1))
+        last_month_start = last_month.replace(day=1,hour=0,minute=0,second=0,microsecond=0)
+        last_month_end = last_month + relativedelta(day=31)
+        last_month_end = last_month_end.replace(hour=23, minute=59, second=59)
+        items = [dict(item) for item in get_events_in_range(
+            time.mktime(last_month_start.timetuple()),
+            time.mktime(last_month_end.timetuple())
+        )]
+        points.append(make_point_from_events(items, last_month_start))
+    return jsonify(points)
+
+
 @app.route('/month/')
 def return_last_30():
     num_days = 31
@@ -89,8 +117,11 @@ def return_last_30():
     for day_count in range(num_days):
         this_day = now - timedelta(days=day_count)
         day_events = get_events_for_day(this_day)
-        points.append(make_point_from_events(day_events))
+        items = [dict(item) for item in day_events]
+        item_time = datetime.fromtimestamp(items[0]['test_time']).replace(hour=0, minute=0, second=0, microsecond=0)
+        points.append(make_point_from_events(items, item_time))
     return jsonify(points)
+
 
 @app.route('/week/')
 def return_last_week():
@@ -102,10 +133,6 @@ def return_last_week():
     )]
     convert_timestamps(items)
     return jsonify(items)
-
-@app.route('/year/')
-def return_last_year():
-    pass
 
 def convert_timestamps(datapoint_array):
     for item in datapoint_array:

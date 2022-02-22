@@ -12,17 +12,24 @@
 <div id="week">
     <h2>Last Week <i id="week-caret"
                      class="far fa-caret-square-right"
-                     onclick="toggle('week', '/week/', 'week-caret', 'Bandwidth the past Week')"></i></h2>
-    <div id="weekBW" style="width: 100%; height: 400px;"></div>
+                     onclick="toggle_detail('weekBW', '/week/', 'week-caret', 'Bandwidth the past Week')"></i></h2>
+    <div id="weekBW" style="width: 100%; height: 400px;display: none"></div>
 </div>
 <div id="month">
     <h2>Last Month <i id="month-caret"
                      class="far fa-caret-square-right"
-                     onclick="tickle('month', '/month/', 'month-caret', 'Bandwidth the past Month')"></i></h2>
-    <div id="monthBW" style="width: 100%; height: 400px;"></div>
+                     onclick="toggle_summary('monthBW', '/month/', 'month-caret', 'Bandwidth the past Month')"></i></h2>
+    <div id="monthBW" style="width: 100%; height: 400px; display: none"></div>
 </div>
+<div id="year">
+    <h2>Last Year <i id="year-caret"
+                     class="far fa-caret-square-right"
+                     onclick="toggle_summary('yearBW', '/year/', 'year-caret', 'Bandwidth the past Year')"></i></h2>
+    <div id="yearBW" style="width: 100%; height: 400px; display: none"></div>
+</div>
+
 <script>
-    function toggle(section_id, path, caret_id, chart_name) {
+    function toggle_detail(section_id, path, caret_id, chart_name) {
         let block = document.getElementById(section_id)
         let caret = document.getElementById(caret_id)
         let state = block.style.display;
@@ -60,7 +67,7 @@
                         }),
                         yAxis: 'leftAxis'
                     }
-                    const bandwidth_chart = new JSC.Chart(section_id + 'BW', {
+                    const bandwidth_chart = new JSC.Chart(section_id, {
                         series: [upMb, downMb, pings],
                         xAxis: {
                             scale: {
@@ -86,7 +93,7 @@
                 });
         }
     }
-        function tickle(section_id, path, caret_id, chart_name) {
+        function toggle_summary(section_id, path, caret_id, chart_name) {
         let block = document.getElementById(section_id)
         let caret = document.getElementById(caret_id)
         let state = block.style.display;
@@ -130,7 +137,7 @@
                         }),
                         yAxis: 'leftAxis'
                     }
-                    const bandwidth_chart = new JSC.Chart(section_id + 'BW', {
+                    const bandwidth_chart = new JSC.Chart(section_id, {
                         series: [upMb, downMb, pings],
                         xAxis: {
                             scale: {
@@ -156,6 +163,7 @@
                 });
         }
     }
+    window.onload = toggle_detail('weekBW', '/week/', 'week-caret', 'Bandwidth the past Week');
 </script>
 </body>
 </html>
