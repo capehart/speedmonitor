@@ -1,0 +1,74 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - rules.yml
+
+# Every probe carries a `tier` label so an outage can be placed:
+#   lan      — the home router
+#   isp      — Ting's first hops (found by traceroute from the Pi)
+#   internet — independent services beyond Ting
+scrape_configs:
+  - job_name: icmp
+    metrics_path: /probe
+    params:
+      module: [icmp]
+    static_configs:
+      - targets: [192.168.1.1]
+        labels: {tier: lan}
+      - targets: [64.99.112.2, 64.98.11.58]
+        labels: {tier: isp}
+      - targets: [1.1.1.1, 8.8.8.8, 9.9.9.9]
+        labels: {tier: internet}
+    relabel_configs: &blackbox
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__address__]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox:9115
+
+  - job_name: dns
+    metrics_path: /probe
+    params:
+      module: [dns]
+    static_configs:
+      - targets: [192.168.1.1]
+        labels: {tier: lan}
+      - targets: [1.1.1.1, 8.8.8.8]
+        labels: {tier: internet}
+    relabel_configs: *blackbox
+
+  - job_name: http
+    metrics_path: /probe
+    params:
+      module: [http]
+    static_configs:
+      - targets: [https://www.google.com/generate_204, https://www.cloudflare.com/cdn-cgi/trace]
+        labels: {tier: internet}
+    relabel_configs: *blackbox
+
+  # Each Ookla test moves roughly 1 GB at current line rates. Two servers every 4h
+  # works out to one test every ~2h (~12 GB/day). Server IDs come from
+  # https://www.speedtest.net/api/js/servers?engine=js
+  - job_name: speedtest
+    metrics_path: /probe
+    scrape_interval: 4h
+    scrape_timeout: 2m
+    static_configs:
+      - targets: ["70055"]
+        labels: {server: "Brightspeed, Charlottesville VA"}
+      - targets: ["14229"]
+        labels: {server: "Frontier, Ashburn VA"}
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_server_id
+      - source_labels: [__address__]
+        target_label: instance
+      - target_label: __address__
+        replacement: speedtest:9798
+
+  - job_name: prometheus
+    static_configs:
+      - targets: [localhost:9090]

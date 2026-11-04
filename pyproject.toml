@@ -1,0 +1,18 @@
+[project]
+name = "speedmonitor"
+version = "2.0.0"
+description = "Home network outage and throughput monitoring: Ookla speedtest exporter and legacy-history backfill"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+speedtest-exporter = "speedmonitor.exporter:main"
+speedmonitor-backfill = "speedmonitor.backfill:main"
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
