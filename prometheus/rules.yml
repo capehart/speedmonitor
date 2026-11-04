@@ -1,0 +1,11 @@
+groups:
+  - name: network
+    rules:
+      # A tier is up if any of its probes succeeded. Reading the three together:
+      #   lan down               -> router or Pi problem
+      #   lan up, isp down       -> Ting
+      #   isp up, internet down  -> beyond Ting (peering/upstream)
+      - record: tier:probe_success:max
+        expr: max by (tier) (probe_success)
+      - record: tier:icmp_rtt_seconds:avg
+        expr: avg by (tier) (probe_icmp_duration_seconds{phase="rtt"} and on (instance, job) probe_success == 1)
