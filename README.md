@@ -29,7 +29,9 @@ Prometheus is also exposed on `:9090` for ad-hoc PromQL.
 - **Speedtests**: there are two pinned servers, one nearby and one in Ashburn, so results are comparable over time. Each is scraped every 4 h, which comes to about one test every 2 h. At current line rates each test moves about 1 GB. Find server IDs at `https://www.speedtest.net/api/js/servers?engine=js` (add `&search=<name>` to filter).
 - **Grafana**: copy `.env.example` to `.env` and set `GRAFANA_ADMIN_PASSWORD`. You only need the admin login to edit. Dashboards are provisioned read-only from [grafana/dashboards](grafana/dashboards). To change one, edit it in the UI, export the JSON, and commit it.
 
-The speedtest container runs the Ookla CLI with `--accept-license --accept-gdpr`, which accepts [Ookla's EULA](https://www.speedtest.net/about/eula) for personal, non-commercial use.
+The speedtest container runs the Ookla CLI with `--accept-license --accept-gdpr`, which accepts [Ookla's EULA](https://www.speedtest.net/about/eula). That license covers personal, non-commercial use on one computer you control, and forbids redistributing the binary or making it available to more than one device on a network. To stay within it:
+- Never push the speedtest image to a registry. The Dockerfile downloads the binary at build time, so it is never committed or redistributed.
+- Keep the exporter's port unpublished in `compose.yaml`. Only Prometheus should reach it, over Docker's internal network.
 
 ## Deploying to the Pi
 
