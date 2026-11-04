@@ -33,7 +33,7 @@ The speedtest container runs the Ookla CLI with `--accept-license --accept-gdpr`
 
 ## Deploying to the Pi
 
-The Pi needs Raspberry Pi OS **64-bit** (Lite is enough). This requires one physical visit to swap the SD card. You don't need a keyboard or monitor.
+The Pi needs Raspberry Pi OS **64-bit** (Lite is enough). This requires two quick physical visits: one to pull the SD card and one to put it back. You don't need a keyboard or monitor.
 
 The Pi's only SD card is reflashed in place, so expect roughly 15–30 minutes of downtime.
 
