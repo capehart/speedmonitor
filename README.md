@@ -35,28 +35,32 @@ The speedtest container runs the Ookla CLI with `--accept-license --accept-gdpr`
 
 The Pi needs Raspberry Pi OS **64-bit** (Lite is enough). This requires one physical visit to swap the SD card. You don't need a keyboard or monitor.
 
-1. **Flash a new card on the Mac** with Raspberry Pi Imager: Raspberry Pi OS Lite (64-bit). In *OS customisation*, set:
-   - hostname `raspberrypi`
-   - user `capehart`
-   - SSH enabled with public-key auth only, using `~/.ssh/current.ed25519.pub`
-   - timezone `America/New_York`
+The Pi's only SD card is reflashed in place, so expect roughly 15–30 minutes of downtime.
 
-   Keep the old card as a rollback.
-2. **Grab the final legacy database**:
+**Prep (no downtime).** Install Imager with `brew install --cask raspberry-pi-imager`, and download the current Raspberry Pi OS Lite (64-bit) `.img.xz` into `data/`. Open Imager and fill in *OS customisation* now, because it remembers the settings:
+- hostname `raspberrypi`
+- user `capehart` (Imager requires a password; SSH will only use the key)
+- SSH enabled with public-key auth only, using `~/.ssh/current.ed25519.pub`
+- timezone `America/New_York`
+
+**Flash day.**
+
+1. Save the final legacy database and power the Pi off:
    ```bash
-   scp pi.internal.accapehart.com:development/speedmonitor/speedmonitor.db data/speedmonitor-legacy.db
+   deploy/reflash.sh before
    ```
-3. **Swap the card** and power-cycle the Pi. It keeps the same MAC, so DHCP should give it the same address.
-4. **Forget the old host key and copy the history over**:
+2. Pull the card, put it in the Mac, and flash it with Imager. Choose *Use custom* and pick the image in `data/`, then apply the saved customisation.
+3. Put the card back and power-cycle the Pi. It keeps the same MAC, so DHCP should give it the same address.
+4. Trust the new host key, copy the history over, and run [deploy/bootstrap.sh](deploy/bootstrap.sh):
    ```bash
-   ssh-keygen -R pi.internal.accapehart.com
-   scp data/speedmonitor-legacy.db pi.internal.accapehart.com:speedmonitor-legacy.db
+   deploy/reflash.sh after
    ```
-5. **Bootstrap.** This installs Docker, clones the repo, backfills the history once, and starts the stack. Re-run it to update.
-   ```bash
-   ssh pi.internal.accapehart.com 'bash -s' < deploy/bootstrap.sh
-   ```
-   To deploy a branch other than `main`, prefix the remote command with `BRANCH=<name>`.
+   The bootstrap installs Docker, clones the repo, backfills the history once, and starts the stack. To deploy a branch other than `main`, prefix the command with `BRANCH=<name>`.
+
+To update later, re-run the bootstrap on its own:
+```bash
+ssh pi.internal.accapehart.com 'bash -s' < deploy/bootstrap.sh
+```
 
 ## Legacy history
 
