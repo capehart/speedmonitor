@@ -1,1 +1,81 @@
 # SpeedMonitor
+
+Home network monitoring on a Raspberry Pi. It answers two questions: *was the connection down, and where?* and *what throughput am I actually getting?*
+
+| Component | Role |
+|---|---|
+| [blackbox_exporter](https://github.com/prometheus/blackbox_exporter) | ICMP, DNS and HTTPS probes every 15 s |
+| `speedtest` (this repo) | Runs one [Ookla CLI](https://www.speedtest.net/apps/cli) test per Prometheus scrape |
+| Prometheus | Scrapes, stores (10 years / 6 GB cap), evaluates recording rules |
+| Grafana | LAN-only dashboard at `http://<pi>:3000`, anonymous read-only |
+
+## Reading the dashboard
+
+Every probe has a `tier` label, and **Reachability by tier** shows one row per tier. The lowest tier that goes red is where the problem is:
+
+| Tier | Targets | If it alone goes red |
+|---|---|---|
+| `lan` | home router (ICMP, DNS) | Router, cabling or the Pi |
+| `isp` | Ting's first two hops | Ting |
+| `internet` | 1.1.1.1, 8.8.8.8, 9.9.9.9, Google/Cloudflare HTTPS | Beyond Ting: peering or upstream |
+
+A tier counts as up if *any* of its probes succeeded (`tier:probe_success:max` in [prometheus/rules.yml](prometheus/rules.yml)), so one flaky target doesn't register as an outage. **Probe failures by target** shows per-target noise.
+
+Prometheus is also exposed on `:9090` for ad-hoc PromQL.
+
+## Configuration
+
+- **Probe targets**: [prometheus/prometheus.yml](prometheus/prometheus.yml). The ISP hops came from `traceroute -n 1.1.1.1` on the Pi. Re-check them if Ting re-routes.
+- **Speedtests**: there are two pinned servers, one nearby and one in Ashburn, so results are comparable over time. Each is scraped every 4 h, which comes to about one test every 2 h. At current line rates each test moves about 1 GB. Find server IDs at `https://www.speedtest.net/api/js/servers?engine=js` (add `&search=<name>` to filter).
+- **Grafana**: copy `.env.example` to `.env` and set `GRAFANA_ADMIN_PASSWORD`. You only need the admin login to edit. Dashboards are provisioned read-only from [grafana/dashboards](grafana/dashboards). To change one, edit it in the UI, export the JSON, and commit it.
+
+The speedtest container runs the Ookla CLI with `--accept-license --accept-gdpr`, which accepts [Ookla's EULA](https://www.speedtest.net/about/eula) for personal, non-commercial use.
+
+## Deploying to the Pi
+
+The Pi needs Raspberry Pi OS **64-bit** (Lite is enough). This requires one physical visit to swap the SD card. You don't need a keyboard or monitor.
+
+1. **Flash a new card on the Mac** with Raspberry Pi Imager: Raspberry Pi OS Lite (64-bit). In *OS customisation*, set:
+   - hostname `raspberrypi`
+   - user `capehart`
+   - SSH enabled with public-key auth only, using `~/.ssh/current.ed25519.pub`
+   - timezone `America/New_York`
+
+   Keep the old card as a rollback.
+2. **Grab the final legacy database**:
+   ```bash
+   scp pi.internal.accapehart.com:development/speedmonitor/speedmonitor.db data/speedmonitor-legacy.db
+   ```
+3. **Swap the card** and power-cycle the Pi. It keeps the same MAC, so DHCP should give it the same address.
+4. **Forget the old host key and copy the history over**:
+   ```bash
+   ssh-keygen -R pi.internal.accapehart.com
+   scp data/speedmonitor-legacy.db pi.internal.accapehart.com:speedmonitor-legacy.db
+   ```
+5. **Bootstrap.** This installs Docker, clones the repo, backfills the history once, and starts the stack. Re-run it to update.
+   ```bash
+   ssh pi.internal.accapehart.com 'bash -s' < deploy/bootstrap.sh
+   ```
+   To deploy a branch other than `main`, prefix the remote command with `BRANCH=<name>`.
+
+## Legacy history
+
+The previous collector (2022–2026, a cron job running `speedtest-cli` into SQLite) is backfilled by [src/speedmonitor/backfill.py](src/speedmonitor/backfill.py) as `instance="legacy"` with the test server as the `server` label. The backfill corrects three problems in the old data:
+
+- download was stored in the `upMb` column and upload in `downMb`
+- values were divided by 1024², not 10⁶
+- unreachable servers recorded a 1,800,000 ms ping
+
+Rows with that placeholder ping, or with zero throughput, become `speedtest_success 0`. The legacy collector chose a random server for each test, so its numbers are much noisier than the pinned tests.
+
+## Development
+
+```bash
+uv run pytest
+```
+
+```bash
+cp .env.example .env && docker compose up -d --build
+```
+
+Running the stack locally on a Mac works for everything except the LAN-tier semantics, since probes originate from Docker's VM.
