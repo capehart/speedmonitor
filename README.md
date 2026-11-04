@@ -39,11 +39,7 @@ The Pi needs Raspberry Pi OS **64-bit** (Lite is enough). This requires two quic
 
 The Pi's only SD card is reflashed in place, so expect roughly 15–30 minutes of downtime.
 
-**Prep (no downtime).** Install Imager with `brew install --cask raspberry-pi-imager`, and download the current Raspberry Pi OS Lite (64-bit) `.img.xz` into `data/`. Open Imager and fill in *OS customisation* now, because it remembers the settings:
-- hostname `raspberrypi`
-- user `capehart` (Imager requires a password; SSH will only use the key)
-- SSH enabled with public-key auth only, using `~/.ssh/current.ed25519.pub`
-- timezone `America/New_York`
+**Prep (no downtime).** Install Imager with `brew install --cask raspberry-pi-imager`, and download the current Raspberry Pi OS Lite (64-bit) `.img.xz` into `data/`.
 
 **Flash day.**
 
@@ -51,9 +47,13 @@ The Pi's only SD card is reflashed in place, so expect roughly 15–30 minutes o
    ```bash
    deploy/reflash.sh before
    ```
-2. Pull the card, put it in the Mac, and flash it with Imager. Choose *Use custom* and pick the image in `data/`, then apply the saved customisation.
-3. Put the card back and power-cycle the Pi. It keeps the same MAC, so DHCP should give it the same address.
-4. Trust the new host key, copy the history over, and run [deploy/bootstrap.sh](deploy/bootstrap.sh):
+2. Pull the card, put it in the Mac, and flash it with Imager: choose *Use custom* and pick the image in `data/`. Imager skips *OS customisation* for custom images and ejects the card when it's done.
+3. Re-insert the card so `bootfs` mounts, then write the first-boot config. It's a cloud-init `user-data` file that creates your user with `~/.ssh/current.ed25519.pub` (override with `SSH_PUBKEY=`), turns off password SSH, and starts SSH:
+   ```bash
+   deploy/reflash.sh card
+   ```
+4. Put the card back in the Pi and power it on. It keeps the same MAC, so DHCP should give it the same address. The first boot takes a minute or two longer while cloud-init runs.
+5. Trust the new host key, copy the history over, and run [deploy/bootstrap.sh](deploy/bootstrap.sh):
    ```bash
    deploy/reflash.sh after
    ```
