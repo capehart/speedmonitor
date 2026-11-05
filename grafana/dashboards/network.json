@@ -107,7 +107,7 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 5,
+        "w": 4,
         "x": 4,
         "y": 1
       },
@@ -160,8 +160,8 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 5,
-        "x": 9,
+        "w": 4,
+        "x": 8,
         "y": 1
       },
       "targets": [
@@ -187,16 +187,16 @@
       }
     },
     {
-      "type": "stat",
-      "title": "Latest speedtest",
+      "type": "gauge",
+      "title": "Latest speedtest vs 1 Gbps plan",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
       "gridPos": {
         "h": 5,
-        "w": 10,
-        "x": 14,
+        "w": 12,
+        "x": 12,
         "y": 1
       },
       "targets": [
@@ -207,8 +207,7 @@
             "uid": "prometheus"
           },
           "expr": "last_over_time(speedtest_download_bits_per_second{instance!=\"legacy\"}[1d])",
-          "legendFormat": "↓ {{server}}",
-          "instant": true
+          "legendFormat": "↓ {{server}}"
         },
         {
           "refId": "B",
@@ -217,20 +216,41 @@
             "uid": "prometheus"
           },
           "expr": "last_over_time(speedtest_upload_bits_per_second{instance!=\"legacy\"}[1d])",
-          "legendFormat": "↑ {{server}}",
-          "instant": true
+          "legendFormat": "↑ {{server}}"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "bps"
+          "unit": "bps",
+          "min": 0,
+          "max": 1000000000.0,
+          "decimals": 0,
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 50
+              },
+              {
+                "color": "green",
+                "value": 80
+              }
+            ]
+          }
         },
         "overrides": []
       },
       "options": {
-        "graphMode": "none",
-        "textMode": "value_and_name"
-      }
+        "showThresholdMarkers": true,
+        "showThresholdLabels": false,
+        "minVizHeight": 75
+      },
+      "description": "Green at 80% of plan or better, yellow from 50%, red below. TCP overhead caps a 1 Gbps line at about 940 Mbps, so ~94% is effectively full speed."
     },
     {
       "type": "row",
@@ -446,14 +466,14 @@
     },
     {
       "type": "timeseries",
-      "title": "Speedtest throughput",
+      "title": "Download",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
       "gridPos": {
         "h": 9,
-        "w": 16,
+        "w": 12,
         "x": 0,
         "y": 29
       },
@@ -464,8 +484,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "avg(avg_over_time(speedtest_download_bits_per_second[$__interval]))",
-          "legendFormat": "download"
+          "expr": "quantile_over_time(0.9, job:speedtest_download_bits_per_second:pooled[$__interval])",
+          "legendFormat": "p90"
         },
         {
           "refId": "B",
@@ -473,37 +493,173 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "avg(avg_over_time(speedtest_upload_bits_per_second[$__interval]))",
-          "legendFormat": "upload"
+          "expr": "quantile_over_time(0.75, job:speedtest_download_bits_per_second:pooled[$__interval])",
+          "legendFormat": "p75"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "quantile_over_time(0.5, job:speedtest_download_bits_per_second:pooled[$__interval])",
+          "legendFormat": "median"
+        },
+        {
+          "refId": "D",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "quantile_over_time(0.25, job:speedtest_download_bits_per_second:pooled[$__interval])",
+          "legendFormat": "p25"
+        },
+        {
+          "refId": "E",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "quantile_over_time(0.1, job:speedtest_download_bits_per_second:pooled[$__interval])",
+          "legendFormat": "p10"
         }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "bps",
+          "min": 0,
+          "max": 1000000000.0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "green"
+          },
           "custom": {
-            "drawStyle": "line",
-            "showPoints": "always",
-            "pointSize": 4,
-            "spanNulls": 86400000
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "spanNulls": 259200000
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p90"
+            },
+            "properties": [
+              {
+                "id": "custom.lineWidth",
+                "value": 0
+              },
+              {
+                "id": "custom.fillBelowTo",
+                "value": "p10"
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 20
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": true,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p75"
+            },
+            "properties": [
+              {
+                "id": "custom.lineWidth",
+                "value": 0
+              },
+              {
+                "id": "custom.fillBelowTo",
+                "value": "p25"
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 20
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": true,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p10"
+            },
+            "properties": [
+              {
+                "id": "custom.lineWidth",
+                "value": 0
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": true,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p25"
+            },
+            "properties": [
+              {
+                "id": "custom.lineWidth",
+                "value": 0
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": true,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            ]
+          }
+        ]
       },
-      "options": {},
-      "description": "Averaged across servers. Data before Nov 2026 is backfilled from the legacy collector, which picked a random server per test, so it is noisier.",
-      "interval": "4h"
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "Median of all tests in each bucket (at least a day), with the middle 50% (p25–p75) and middle 80% (p10–p90) shaded. Data before Nov 2026 comes from the legacy collector, which picked a random server per test, so its bands are wider.",
+      "interval": "1d",
+      "maxDataPoints": 100
     },
     {
       "type": "timeseries",
-      "title": "Speedtest failures",
+      "title": "Upload",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
       "gridPos": {
         "h": 9,
-        "w": 8,
-        "x": 16,
+        "w": 12,
+        "x": 12,
         "y": 29
       },
       "targets": [
@@ -513,25 +669,170 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(count_over_time(speedtest_success[$__interval]) - sum_over_time(speedtest_success[$__interval]))",
-          "legendFormat": "failed tests"
+          "expr": "quantile_over_time(0.9, job:speedtest_upload_bits_per_second:pooled[$__interval])",
+          "legendFormat": "p90"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "quantile_over_time(0.75, job:speedtest_upload_bits_per_second:pooled[$__interval])",
+          "legendFormat": "p75"
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "quantile_over_time(0.5, job:speedtest_upload_bits_per_second:pooled[$__interval])",
+          "legendFormat": "median"
+        },
+        {
+          "refId": "D",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "quantile_over_time(0.25, job:speedtest_upload_bits_per_second:pooled[$__interval])",
+          "legendFormat": "p25"
+        },
+        {
+          "refId": "E",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "quantile_over_time(0.1, job:speedtest_upload_bits_per_second:pooled[$__interval])",
+          "legendFormat": "p10"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "custom": {
-            "drawStyle": "bars",
-            "fillOpacity": 80
-          },
+          "unit": "bps",
+          "min": 0,
+          "max": 1000000000.0,
           "color": {
             "mode": "fixed",
-            "fixedColor": "orange"
+            "fixedColor": "blue"
+          },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "spanNulls": 259200000
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p90"
+            },
+            "properties": [
+              {
+                "id": "custom.lineWidth",
+                "value": 0
+              },
+              {
+                "id": "custom.fillBelowTo",
+                "value": "p10"
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 20
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": true,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p75"
+            },
+            "properties": [
+              {
+                "id": "custom.lineWidth",
+                "value": 0
+              },
+              {
+                "id": "custom.fillBelowTo",
+                "value": "p25"
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 20
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": true,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p10"
+            },
+            "properties": [
+              {
+                "id": "custom.lineWidth",
+                "value": 0
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": true,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p25"
+            },
+            "properties": [
+              {
+                "id": "custom.lineWidth",
+                "value": 0
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": true,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            ]
+          }
+        ]
       },
-      "options": {},
-      "interval": "4h"
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "description": "Median of all tests in each bucket (at least a day), with the middle 50% (p25–p75) and middle 80% (p10–p90) shaded. Data before Nov 2026 comes from the legacy collector, which picked a random server per test, so its bands are wider.",
+      "interval": "1d",
+      "maxDataPoints": 100
     },
     {
       "type": "timeseries",
@@ -542,7 +843,7 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 24,
+        "w": 16,
         "x": 0,
         "y": 38
       },
@@ -574,6 +875,46 @@
             "showPoints": "always",
             "pointSize": 4,
             "spanNulls": 86400000
+          }
+        },
+        "overrides": []
+      },
+      "options": {},
+      "interval": "4h"
+    },
+    {
+      "type": "timeseries",
+      "title": "Speedtest failures",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 38
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(count_over_time(speedtest_success[$__interval]) - sum_over_time(speedtest_success[$__interval]))",
+          "legendFormat": "failed tests"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80
+          },
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "orange"
           }
         },
         "overrides": []

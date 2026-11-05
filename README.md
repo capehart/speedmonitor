@@ -81,6 +81,10 @@ uv run pytest
 ```
 
 ```bash
+docker run --rm --entrypoint promtool -v "$PWD/prometheus:/p:ro" prom/prometheus:v3.15.1 test rules /p/rules.test.yml
+```
+
+```bash
 cp .env.example .env && docker compose up -d --build
 ```
 
