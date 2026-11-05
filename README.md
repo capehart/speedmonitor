@@ -7,7 +7,7 @@ Home network monitoring on a Raspberry Pi. It answers two questions: *was the co
 | [blackbox_exporter](https://github.com/prometheus/blackbox_exporter) | ICMP, DNS and HTTPS probes every 15 s |
 | `speedtest` (this repo) | Runs one [Ookla CLI](https://www.speedtest.net/apps/cli) test per Prometheus scrape |
 | Prometheus | Scrapes, stores (10 years / 6 GB cap), evaluates recording rules |
-| Grafana | LAN-only dashboard at `http://<pi>:3000`, anonymous read-only |
+| Grafana | LAN-only dashboard at `http://<pi>` (also `:3000`), anonymous read-only |
 
 ## Reading the dashboard
 
