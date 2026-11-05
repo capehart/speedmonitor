@@ -265,6 +265,1026 @@
       "panels": []
     },
     {
+      "type": "canvas",
+      "title": "Path to the internet",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 7
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "avg(avg_over_time(probe_success{instance=\"192.168.1.1\"}[$__range]))",
+          "legendFormat": "router",
+          "instant": true
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "avg(avg_over_time(probe_success{instance=\"64.99.112.2\"}[$__range]))",
+          "legendFormat": "hop1",
+          "instant": true
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "avg(avg_over_time(probe_success{instance=\"64.98.11.58\"}[$__range]))",
+          "legendFormat": "hop2",
+          "instant": true
+        },
+        {
+          "refId": "D",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "avg(avg_over_time(probe_success{instance=\"1.1.1.1\"}[$__range]))",
+          "legendFormat": "cf_dns",
+          "instant": true
+        },
+        {
+          "refId": "E",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "avg(avg_over_time(probe_success{instance=\"8.8.8.8\"}[$__range]))",
+          "legendFormat": "google_dns",
+          "instant": true
+        },
+        {
+          "refId": "F",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "avg(avg_over_time(probe_success{instance=\"9.9.9.9\"}[$__range]))",
+          "legendFormat": "quad9",
+          "instant": true
+        },
+        {
+          "refId": "G",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "avg(avg_over_time(probe_success{instance=\"https://www.google.com/generate_204\"}[$__range]))",
+          "legendFormat": "google_https",
+          "instant": true
+        },
+        {
+          "refId": "H",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "avg(avg_over_time(probe_success{instance=\"https://www.cloudflare.com/cdn-cgi/trace\"}[$__range]))",
+          "legendFormat": "cf_https",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 2,
+          "min": 0,
+          "max": 1,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.99
+              },
+              {
+                "color": "green",
+                "value": 0.999
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "inlineEditing": false,
+        "showAdvancedTypes": true,
+        "panZoom": false,
+        "root": {
+          "type": "frame",
+          "name": "root",
+          "elements": [
+            {
+              "type": "rectangle",
+              "name": "pi",
+              "config": {
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "Pi"
+                },
+                "color": {
+                  "fixed": "#ffffff"
+                },
+                "size": 14,
+                "align": "center",
+                "valign": "middle"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "color": {
+                  "fixed": "#5f6670"
+                },
+                "width": 2,
+                "radius": 6
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "placement": {
+                "left": 16,
+                "top": 152,
+                "width": 118,
+                "height": 40
+              },
+              "connections": [
+                {
+                  "source": {
+                    "x": 1,
+                    "y": 0
+                  },
+                  "target": {
+                    "x": -1,
+                    "y": 0
+                  },
+                  "targetName": "switch",
+                  "path": "straight",
+                  "color": {
+                    "field": "router",
+                    "fixed": "#5f6670"
+                  },
+                  "size": {
+                    "fixed": 3,
+                    "min": 1,
+                    "max": 10
+                  }
+                }
+              ]
+            },
+            {
+              "type": "rectangle",
+              "name": "switch",
+              "config": {
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "Switch (inferred)"
+                },
+                "color": {
+                  "fixed": "#ffffff"
+                },
+                "size": 14,
+                "align": "center",
+                "valign": "middle"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "color": {
+                  "fixed": "#5f6670"
+                },
+                "width": 2,
+                "radius": 6
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "placement": {
+                "left": 176,
+                "top": 152,
+                "width": 118,
+                "height": 40
+              },
+              "connections": [
+                {
+                  "source": {
+                    "x": 1,
+                    "y": 0
+                  },
+                  "target": {
+                    "x": -1,
+                    "y": 0
+                  },
+                  "targetName": "router",
+                  "path": "straight",
+                  "color": {
+                    "field": "router",
+                    "fixed": "#5f6670"
+                  },
+                  "size": {
+                    "fixed": 3,
+                    "min": 1,
+                    "max": 10
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "name": "router_label",
+              "config": {
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "Router"
+                },
+                "color": {
+                  "fixed": "#ccccdc"
+                },
+                "size": 12,
+                "align": "center",
+                "valign": "bottom"
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "placement": {
+                "left": 320,
+                "top": 132,
+                "width": 150,
+                "height": 18
+              }
+            },
+            {
+              "type": "metric-value",
+              "name": "router",
+              "config": {
+                "text": {
+                  "mode": "field",
+                  "field": "router",
+                  "fixed": ""
+                },
+                "color": {
+                  "fixed": "#ffffff"
+                },
+                "size": 14,
+                "align": "center",
+                "valign": "middle"
+              },
+              "background": {
+                "color": {
+                  "field": "router",
+                  "fixed": "#5f6670"
+                }
+              },
+              "border": {
+                "color": {
+                  "fixed": "#5f6670"
+                },
+                "width": 0,
+                "radius": 6
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "placement": {
+                "left": 336,
+                "top": 152,
+                "width": 118,
+                "height": 40
+              },
+              "connections": [
+                {
+                  "source": {
+                    "x": 1,
+                    "y": 0
+                  },
+                  "target": {
+                    "x": -1,
+                    "y": 0
+                  },
+                  "targetName": "ont",
+                  "path": "straight",
+                  "color": {
+                    "field": "hop1",
+                    "fixed": "#5f6670"
+                  },
+                  "size": {
+                    "fixed": 3,
+                    "min": 1,
+                    "max": 10
+                  }
+                }
+              ]
+            },
+            {
+              "type": "rectangle",
+              "name": "ont",
+              "config": {
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "ONT (inferred)"
+                },
+                "color": {
+                  "fixed": "#ffffff"
+                },
+                "size": 14,
+                "align": "center",
+                "valign": "middle"
+              },
+              "background": {
+                "color": {
+                  "fixed": "transparent"
+                }
+              },
+              "border": {
+                "color": {
+                  "fixed": "#5f6670"
+                },
+                "width": 2,
+                "radius": 6
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "placement": {
+                "left": 496,
+                "top": 152,
+                "width": 118,
+                "height": 40
+              },
+              "connections": [
+                {
+                  "source": {
+                    "x": 1,
+                    "y": 0
+                  },
+                  "target": {
+                    "x": -1,
+                    "y": 0
+                  },
+                  "targetName": "hop1",
+                  "path": "straight",
+                  "color": {
+                    "field": "hop1",
+                    "fixed": "#5f6670"
+                  },
+                  "size": {
+                    "fixed": 3,
+                    "min": 1,
+                    "max": 10
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "name": "hop1_label",
+              "config": {
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "Ting 64.99.112.2"
+                },
+                "color": {
+                  "fixed": "#ccccdc"
+                },
+                "size": 12,
+                "align": "center",
+                "valign": "bottom"
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "placement": {
+                "left": 640,
+                "top": 132,
+                "width": 150,
+                "height": 18
+              }
+            },
+            {
+              "type": "metric-value",
+              "name": "hop1",
+              "config": {
+                "text": {
+                  "mode": "field",
+                  "field": "hop1",
+                  "fixed": ""
+                },
+                "color": {
+                  "fixed": "#ffffff"
+                },
+                "size": 14,
+                "align": "center",
+                "valign": "middle"
+              },
+              "background": {
+                "color": {
+                  "field": "hop1",
+                  "fixed": "#5f6670"
+                }
+              },
+              "border": {
+                "color": {
+                  "fixed": "#5f6670"
+                },
+                "width": 0,
+                "radius": 6
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "placement": {
+                "left": 656,
+                "top": 152,
+                "width": 118,
+                "height": 40
+              },
+              "connections": [
+                {
+                  "source": {
+                    "x": 1,
+                    "y": 0
+                  },
+                  "target": {
+                    "x": -1,
+                    "y": 0
+                  },
+                  "targetName": "hop2",
+                  "path": "straight",
+                  "color": {
+                    "field": "hop2",
+                    "fixed": "#5f6670"
+                  },
+                  "size": {
+                    "fixed": 3,
+                    "min": 1,
+                    "max": 10
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "name": "hop2_label",
+              "config": {
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "Ting 64.98.11.58"
+                },
+                "color": {
+                  "fixed": "#ccccdc"
+                },
+                "size": 12,
+                "align": "center",
+                "valign": "bottom"
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "placement": {
+                "left": 800,
+                "top": 132,
+                "width": 150,
+                "height": 18
+              }
+            },
+            {
+              "type": "metric-value",
+              "name": "hop2",
+              "config": {
+                "text": {
+                  "mode": "field",
+                  "field": "hop2",
+                  "fixed": ""
+                },
+                "color": {
+                  "fixed": "#ffffff"
+                },
+                "size": 14,
+                "align": "center",
+                "valign": "middle"
+              },
+              "background": {
+                "color": {
+                  "field": "hop2",
+                  "fixed": "#5f6670"
+                }
+              },
+              "border": {
+                "color": {
+                  "fixed": "#5f6670"
+                },
+                "width": 0,
+                "radius": 6
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "placement": {
+                "left": 816,
+                "top": 152,
+                "width": 118,
+                "height": 40
+              },
+              "connections": [
+                {
+                  "source": {
+                    "x": 1,
+                    "y": 0
+                  },
+                  "target": {
+                    "x": -1,
+                    "y": 0
+                  },
+                  "targetName": "cf_dns",
+                  "path": "straight",
+                  "color": {
+                    "field": "cf_dns",
+                    "fixed": "#5f6670"
+                  },
+                  "size": {
+                    "fixed": 3,
+                    "min": 1,
+                    "max": 10
+                  }
+                },
+                {
+                  "source": {
+                    "x": 1,
+                    "y": 0
+                  },
+                  "target": {
+                    "x": -1,
+                    "y": 0
+                  },
+                  "targetName": "google_dns",
+                  "path": "straight",
+                  "color": {
+                    "field": "google_dns",
+                    "fixed": "#5f6670"
+                  },
+                  "size": {
+                    "fixed": 3,
+                    "min": 1,
+                    "max": 10
+                  }
+                },
+                {
+                  "source": {
+                    "x": 1,
+                    "y": 0
+                  },
+                  "target": {
+                    "x": -1,
+                    "y": 0
+                  },
+                  "targetName": "quad9",
+                  "path": "straight",
+                  "color": {
+                    "field": "quad9",
+                    "fixed": "#5f6670"
+                  },
+                  "size": {
+                    "fixed": 3,
+                    "min": 1,
+                    "max": 10
+                  }
+                },
+                {
+                  "source": {
+                    "x": 1,
+                    "y": 0
+                  },
+                  "target": {
+                    "x": -1,
+                    "y": 0
+                  },
+                  "targetName": "google_https",
+                  "path": "straight",
+                  "color": {
+                    "field": "google_https",
+                    "fixed": "#5f6670"
+                  },
+                  "size": {
+                    "fixed": 3,
+                    "min": 1,
+                    "max": 10
+                  }
+                },
+                {
+                  "source": {
+                    "x": 1,
+                    "y": 0
+                  },
+                  "target": {
+                    "x": -1,
+                    "y": 0
+                  },
+                  "targetName": "cf_https",
+                  "path": "straight",
+                  "color": {
+                    "field": "cf_https",
+                    "fixed": "#5f6670"
+                  },
+                  "size": {
+                    "fixed": 3,
+                    "min": 1,
+                    "max": 10
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "name": "cf_dns_label",
+              "config": {
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "1.1.1.1"
+                },
+                "color": {
+                  "fixed": "#ccccdc"
+                },
+                "size": 12,
+                "align": "center",
+                "valign": "bottom"
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "placement": {
+                "left": 1000,
+                "top": 4,
+                "width": 150,
+                "height": 18
+              }
+            },
+            {
+              "type": "metric-value",
+              "name": "cf_dns",
+              "config": {
+                "text": {
+                  "mode": "field",
+                  "field": "cf_dns",
+                  "fixed": ""
+                },
+                "color": {
+                  "fixed": "#ffffff"
+                },
+                "size": 14,
+                "align": "center",
+                "valign": "middle"
+              },
+              "background": {
+                "color": {
+                  "field": "cf_dns",
+                  "fixed": "#5f6670"
+                }
+              },
+              "border": {
+                "color": {
+                  "fixed": "#5f6670"
+                },
+                "width": 0,
+                "radius": 6
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "placement": {
+                "left": 1016,
+                "top": 24,
+                "width": 118,
+                "height": 40
+              },
+              "connections": []
+            },
+            {
+              "type": "text",
+              "name": "google_dns_label",
+              "config": {
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "8.8.8.8"
+                },
+                "color": {
+                  "fixed": "#ccccdc"
+                },
+                "size": 12,
+                "align": "center",
+                "valign": "bottom"
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "placement": {
+                "left": 1000,
+                "top": 68,
+                "width": 150,
+                "height": 18
+              }
+            },
+            {
+              "type": "metric-value",
+              "name": "google_dns",
+              "config": {
+                "text": {
+                  "mode": "field",
+                  "field": "google_dns",
+                  "fixed": ""
+                },
+                "color": {
+                  "fixed": "#ffffff"
+                },
+                "size": 14,
+                "align": "center",
+                "valign": "middle"
+              },
+              "background": {
+                "color": {
+                  "field": "google_dns",
+                  "fixed": "#5f6670"
+                }
+              },
+              "border": {
+                "color": {
+                  "fixed": "#5f6670"
+                },
+                "width": 0,
+                "radius": 6
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "placement": {
+                "left": 1016,
+                "top": 88,
+                "width": 118,
+                "height": 40
+              },
+              "connections": []
+            },
+            {
+              "type": "text",
+              "name": "quad9_label",
+              "config": {
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "9.9.9.9"
+                },
+                "color": {
+                  "fixed": "#ccccdc"
+                },
+                "size": 12,
+                "align": "center",
+                "valign": "bottom"
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "placement": {
+                "left": 1000,
+                "top": 132,
+                "width": 150,
+                "height": 18
+              }
+            },
+            {
+              "type": "metric-value",
+              "name": "quad9",
+              "config": {
+                "text": {
+                  "mode": "field",
+                  "field": "quad9",
+                  "fixed": ""
+                },
+                "color": {
+                  "fixed": "#ffffff"
+                },
+                "size": 14,
+                "align": "center",
+                "valign": "middle"
+              },
+              "background": {
+                "color": {
+                  "field": "quad9",
+                  "fixed": "#5f6670"
+                }
+              },
+              "border": {
+                "color": {
+                  "fixed": "#5f6670"
+                },
+                "width": 0,
+                "radius": 6
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "placement": {
+                "left": 1016,
+                "top": 152,
+                "width": 118,
+                "height": 40
+              },
+              "connections": []
+            },
+            {
+              "type": "text",
+              "name": "google_https_label",
+              "config": {
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "Google HTTPS"
+                },
+                "color": {
+                  "fixed": "#ccccdc"
+                },
+                "size": 12,
+                "align": "center",
+                "valign": "bottom"
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "placement": {
+                "left": 1000,
+                "top": 196,
+                "width": 150,
+                "height": 18
+              }
+            },
+            {
+              "type": "metric-value",
+              "name": "google_https",
+              "config": {
+                "text": {
+                  "mode": "field",
+                  "field": "google_https",
+                  "fixed": ""
+                },
+                "color": {
+                  "fixed": "#ffffff"
+                },
+                "size": 14,
+                "align": "center",
+                "valign": "middle"
+              },
+              "background": {
+                "color": {
+                  "field": "google_https",
+                  "fixed": "#5f6670"
+                }
+              },
+              "border": {
+                "color": {
+                  "fixed": "#5f6670"
+                },
+                "width": 0,
+                "radius": 6
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "placement": {
+                "left": 1016,
+                "top": 216,
+                "width": 118,
+                "height": 40
+              },
+              "connections": []
+            },
+            {
+              "type": "text",
+              "name": "cf_https_label",
+              "config": {
+                "text": {
+                  "mode": "fixed",
+                  "fixed": "Cloudflare HTTPS"
+                },
+                "color": {
+                  "fixed": "#ccccdc"
+                },
+                "size": 12,
+                "align": "center",
+                "valign": "bottom"
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "placement": {
+                "left": 1000,
+                "top": 260,
+                "width": 150,
+                "height": 18
+              }
+            },
+            {
+              "type": "metric-value",
+              "name": "cf_https",
+              "config": {
+                "text": {
+                  "mode": "field",
+                  "field": "cf_https",
+                  "fixed": ""
+                },
+                "color": {
+                  "fixed": "#ffffff"
+                },
+                "size": 14,
+                "align": "center",
+                "valign": "middle"
+              },
+              "background": {
+                "color": {
+                  "field": "cf_https",
+                  "fixed": "#5f6670"
+                }
+              },
+              "border": {
+                "color": {
+                  "fixed": "#5f6670"
+                },
+                "width": 0,
+                "radius": 6
+              },
+              "constraint": {
+                "horizontal": "left",
+                "vertical": "top"
+              },
+              "placement": {
+                "left": 1016,
+                "top": 280,
+                "width": 118,
+                "height": 40
+              },
+              "connections": []
+            }
+          ],
+          "background": {
+            "color": {
+              "fixed": "transparent"
+            }
+          },
+          "border": {
+            "color": {
+              "fixed": "dark-green"
+            }
+          },
+          "constraint": {
+            "horizontal": "left",
+            "vertical": "top"
+          }
+        }
+      },
+      "description": "Share of probes that succeeded over the selected time range, from the Pi's point of view. Read left to right: the first node that isn't green is where the path breaks. Zoom into an outage to see where it happened. The switch and ONT don't answer probes, so the lines through them take the colour of the next measured hop. Green ≥ 99.9%, yellow ≥ 99%."
+    },
+    {
       "type": "state-timeline",
       "title": "Reachability by tier",
       "datasource": {
@@ -275,7 +1295,7 @@
         "h": 6,
         "w": 24,
         "x": 0,
-        "y": 7
+        "y": 17
       },
       "targets": [
         {
@@ -342,7 +1362,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 13
+        "y": 23
       },
       "targets": [
         {
@@ -377,7 +1397,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 13
+        "y": 23
       },
       "targets": [
         {
@@ -418,7 +1438,7 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 31
       },
       "targets": [
         {
@@ -460,7 +1480,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 28
+        "y": 38
       },
       "panels": []
     },
@@ -475,7 +1495,7 @@
         "h": 9,
         "w": 12,
         "x": 0,
-        "y": 29
+        "y": 39
       },
       "targets": [
         {
@@ -660,7 +1680,7 @@
         "h": 9,
         "w": 12,
         "x": 12,
-        "y": 29
+        "y": 39
       },
       "targets": [
         {
@@ -845,7 +1865,7 @@
         "h": 8,
         "w": 16,
         "x": 0,
-        "y": 38
+        "y": 48
       },
       "targets": [
         {
@@ -893,7 +1913,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 38
+        "y": 48
       },
       "targets": [
         {
