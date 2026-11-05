@@ -10,6 +10,37 @@ Home network monitoring on a Raspberry Pi. It answers two questions: *was the co
 | Grafana | LAN-only dashboard at `http://<pi>` (also `:3000`), anonymous read-only |
 | [grafana-image-renderer](https://github.com/grafana/grafana-image-renderer) | Headless Chromium behind *Export → Export as image*; internal only |
 
+```mermaid
+flowchart LR
+    viewer(["Browser on the LAN"])
+
+    subgraph pi["Raspberry Pi · Docker Compose"]
+        grafana["Grafana<br/>:80 / :3000"]
+        renderer["image renderer"]
+        prometheus[("Prometheus<br/>:9090<br/>TSDB + recording rules")]
+        blackbox["blackbox_exporter"]
+        speedtest["speedtest exporter<br/>(Ookla CLI)"]
+    end
+
+    subgraph targets["Probe targets, by tier"]
+        lan["lan<br/>router 192.168.1.1"]
+        isp["isp<br/>Ting hops"]
+        internet["internet<br/>1.1.1.1 · 8.8.8.8 · 9.9.9.9<br/>Google · Cloudflare HTTPS"]
+    end
+
+    ookla["Ookla servers<br/>Brightspeed · Frontier"]
+    legacy[("Legacy SQLite<br/>2022–2026")]
+
+    viewer --> grafana
+    grafana -- PromQL --> prometheus
+    grafana <-- render --> renderer
+    prometheus -- "/probe every 15 s" --> blackbox
+    prometheus -- "/probe every 4 h per server" --> speedtest
+    blackbox -- "ICMP / DNS / HTTPS" --> lan & isp & internet
+    speedtest -- speedtest --> ookla
+    legacy -. "one-time backfill<br/>(backfill.py + promtool)" .-> prometheus
+```
+
 ## Reading the dashboard
 
 **Path to the internet** draws the route from the Pi out to the internet targets. Each node is coloured by the share of its probes that succeeded over the selected time range: green at 99.9% or better, yellow from 99%, red below. Read it left to right; the first node that isn't green is where the path breaks. Zoom the time range into an outage to see where it happened. The switch and the ONT bridge traffic without answering probes, so they're drawn as inferred, and the lines through them take the colour of the next measured hop. A red router means the switch, the cabling or the router; a green router with a red first Ting hop means the ONT, the fibre or Ting.
