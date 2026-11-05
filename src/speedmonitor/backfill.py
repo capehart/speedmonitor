@@ -11,7 +11,7 @@ import sys
 from collections import defaultdict
 from typing import IO
 
-from speedmonitor import DOWNLOAD, LATENCY, SUCCESS, UPLOAD
+from speedmonitor import DOWNLOAD, LATENCY, POOLED, SUCCESS, UPLOAD
 
 UNREACHABLE_PING_MS = 1_800_000
 MIBIT = 1024**2
@@ -38,6 +38,8 @@ def convert(db_path: str, out: IO[str]) -> int:
         labels = f'job="speedtest",instance="legacy",server="{escape(row["host"] or "unknown")}"'
         for name, value in samples(row).items():
             families[name].append(f"{name}{{{labels}}} {value} {row['test_time']}\n")
+            if name in POOLED:
+                families[POOLED[name]].append(f'{POOLED[name]}{{job="speedtest"}} {value} {row["test_time"]}\n')
     connection.close()
     for name, lines in families.items():
         out.write(f"# TYPE {name} gauge\n")

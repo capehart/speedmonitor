@@ -9,3 +9,12 @@ groups:
         expr: max by (tier) (probe_success)
       - record: tier:icmp_rtt_seconds:avg
         expr: avg by (tier) (probe_icmp_duration_seconds{phase="rtt"} and on (instance, job) probe_success == 1)
+
+  - name: speedtest
+    rules:
+      # The window equals the evaluation interval and range selectors are left-open, so each
+      # test lands in exactly one evaluation: a sparse series with one sample per test.
+      - record: job:speedtest_download_bits_per_second:pooled
+        expr: avg without (server, instance) (last_over_time(speedtest_download_bits_per_second[15s]))
+      - record: job:speedtest_upload_bits_per_second:pooled
+        expr: avg without (server, instance) (last_over_time(speedtest_upload_bits_per_second[15s]))

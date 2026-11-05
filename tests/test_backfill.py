@@ -3,7 +3,7 @@ import sqlite3
 
 import pytest
 
-from speedmonitor import DOWNLOAD, LATENCY, SUCCESS, UPLOAD, backfill
+from speedmonitor import DOWNLOAD, LATENCY, POOLED, SUCCESS, UPLOAD, backfill
 
 
 @pytest.fixture
@@ -56,6 +56,9 @@ def test_convert_writes_grouped_time_ordered_openmetrics(legacy_db):
     ]
     assert f"{DOWNLOAD}{{{near}}} {500 * 1024**2} 1700000000" in lines
     assert not any(line.startswith(DOWNLOAD) and "far.example" in line for line in lines)
+    assert f'{POOLED[DOWNLOAD]}{{job="speedtest"}} {500 * 1024**2} 1700000000' in lines
+    assert f'{POOLED[UPLOAD]}{{job="speedtest"}} {300 * 1024**2} 1700000000' in lines
+    assert sum(line.startswith(POOLED[DOWNLOAD]) for line in lines) == 1
     assert lines[-1] == "# EOF"
 
 
