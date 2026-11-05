@@ -29,11 +29,13 @@ main() {
   fi
   cd "$DIR"
 
-  if [[ ! -f .env ]]; then
-    printf 'GRAFANA_ADMIN_PASSWORD=%s\n' "$(openssl rand -hex 16)" > .env
-    chmod 600 .env
-    echo "Generated Grafana admin password in $DIR/.env"
-  fi
+  touch .env && chmod 600 .env
+  for var in GRAFANA_ADMIN_PASSWORD RENDERER_TOKEN; do
+    if ! grep -q "^$var=" .env; then
+      printf '%s=%s\n' "$var" "$(openssl rand -hex 16)" >> .env
+      echo "Generated $var in $DIR/.env"
+    fi
+  done
 
   docker compose version >/dev/null
   docker compose build -q
