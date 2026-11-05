@@ -11,34 +11,28 @@ Home network monitoring on a Raspberry Pi. It answers two questions: *was the co
 | [grafana-image-renderer](https://github.com/grafana/grafana-image-renderer) | Headless Chromium behind *Export → Export as image*; internal only |
 
 ```mermaid
-flowchart LR
+flowchart TB
     viewer(["Browser on the LAN"])
+    legacy[("Legacy SQLite<br/>2022–2026")]
 
     subgraph pi["Raspberry Pi · Docker Compose"]
-        grafana["Grafana<br/>:80"]
-        renderer["image renderer"]
-        prometheus[("Prometheus<br/>:9090<br/>TSDB + recording rules")]
-        blackbox["blackbox_exporter"]
-        speedtest["speedtest exporter<br/>(Ookla CLI)"]
+        grafana["Grafana :80"] <-- render --> renderer["image renderer"]
+        grafana -- PromQL --> prometheus[("Prometheus :9090<br/>TSDB + recording rules")]
+        prometheus -- "/probe every 15 s" --> blackbox["blackbox_exporter"]
+        prometheus -- "/probe every 4 h per server" --> speedtest["speedtest exporter<br/>(Ookla CLI)"]
     end
 
     subgraph targets["Probe targets, by tier"]
-        lan["lan<br/>router 192.168.1.1"]
-        isp["isp<br/>Ting hops"]
-        internet["internet<br/>1.1.1.1 · 8.8.8.8 · 9.9.9.9<br/>Google · Cloudflare HTTPS"]
+        direction LR
+        lan["lan<br/>router"] ~~~ isp["isp<br/>Ting hops"] ~~~ internet["internet<br/>1.1.1.1 · 8.8.8.8 · 9.9.9.9<br/>Google · Cloudflare HTTPS"]
     end
 
     ookla["Ookla servers<br/>Brightspeed · Frontier"]
-    legacy[("Legacy SQLite<br/>2022–2026")]
 
     viewer --> grafana
-    grafana -- PromQL --> prometheus
-    grafana <-- render --> renderer
-    prometheus -- "/probe every 15 s" --> blackbox
-    prometheus -- "/probe every 4 h per server" --> speedtest
-    blackbox -- "ICMP / DNS / HTTPS" --> lan & isp & internet
-    speedtest -- speedtest --> ookla
     legacy -. "one-time backfill<br/>(backfill.py + promtool)" .-> prometheus
+    blackbox -- "ICMP / DNS / HTTPS" --> targets
+    speedtest --> ookla
 ```
 
 ## Reading the dashboard
