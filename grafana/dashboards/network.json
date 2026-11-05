@@ -647,7 +647,7 @@
       },
       "description": "Median of all tests in each bucket (at least a day), with the middle 50% (p25–p75) and middle 80% (p10–p90) shaded. Data before Nov 2026 comes from the legacy collector, which picked a random server per test, so its bands are wider.",
       "interval": "1d",
-      "maxDataPoints": 400
+      "maxDataPoints": 100
     },
     {
       "type": "timeseries",
@@ -832,7 +832,7 @@
       },
       "description": "Median of all tests in each bucket (at least a day), with the middle 50% (p25–p75) and middle 80% (p10–p90) shaded. Data before Nov 2026 comes from the legacy collector, which picked a random server per test, so its bands are wider.",
       "interval": "1d",
-      "maxDataPoints": 400
+      "maxDataPoints": 100
     },
     {
       "type": "timeseries",
