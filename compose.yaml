@@ -31,6 +31,9 @@ services:
     image: grafana/grafana-oss:13.0.2
     restart: unless-stopped
     environment:
+      # Grafana builds absolute URLs from this (export as image fetches from it), so it must be the
+      # address browsers use. One canonical URL avoids cross-origin failures from a second port.
+      GF_SERVER_ROOT_URL: ${GRAFANA_ROOT_URL:-http://pi.internal.accapehart.com/}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?set GRAFANA_ADMIN_PASSWORD in .env}
       GF_AUTH_ANONYMOUS_ENABLED: "true"
       GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
@@ -46,7 +49,6 @@ services:
       - grafana-data:/var/lib/grafana
     ports:
       - "80:3000"
-      - "3000:3000"
 
   # Headless Chromium behind Grafana's "Export as image". Not published: only Grafana calls it.
   renderer:

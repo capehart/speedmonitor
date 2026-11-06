@@ -7,8 +7,33 @@ Home network monitoring on a Raspberry Pi. It answers two questions: *was the co
 | [blackbox_exporter](https://github.com/prometheus/blackbox_exporter) | ICMP, DNS and HTTPS probes every 15 s |
 | `speedtest` (this repo) | Runs one [Ookla CLI](https://www.speedtest.net/apps/cli) test per Prometheus scrape |
 | Prometheus | Scrapes, stores (10 years / 6 GB cap), evaluates recording rules |
-| Grafana | LAN-only dashboard at `http://<pi>` (also `:3000`), anonymous read-only |
+| Grafana | LAN-only dashboard at `http://pi.internal.accapehart.com`, anonymous read-only |
 | [grafana-image-renderer](https://github.com/grafana/grafana-image-renderer) | Headless Chromium behind *Export → Export as image*; internal only |
+
+```mermaid
+flowchart TB
+    viewer(["Browser on the LAN"])
+    legacy[("Legacy SQLite<br/>2022–2026")]
+
+    subgraph pi["Raspberry Pi · Docker Compose"]
+        grafana["Grafana :80"] <-- render --> renderer["image renderer"]
+        grafana -- PromQL --> prometheus[("Prometheus :9090<br/>TSDB + recording rules")]
+        prometheus -- "/probe every 15 s" --> blackbox["blackbox_exporter"]
+        prometheus -- "/probe every 4 h per server" --> speedtest["speedtest exporter<br/>(Ookla CLI)"]
+    end
+
+    subgraph targets["Probe targets, by tier"]
+        direction LR
+        lan["lan<br/>router"] ~~~ isp["isp<br/>Ting hops"] ~~~ internet["internet<br/>1.1.1.1 · 8.8.8.8 · 9.9.9.9<br/>Google · Cloudflare HTTPS"]
+    end
+
+    ookla["Ookla servers<br/>Brightspeed · Frontier"]
+
+    viewer --> grafana
+    legacy -. "one-time backfill<br/>(backfill.py + promtool)" .-> prometheus
+    blackbox -- "ICMP / DNS / HTTPS" --> targets
+    speedtest --> ookla
+```
 
 ## Reading the dashboard
 
