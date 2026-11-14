@@ -47,7 +47,10 @@ CLOUDINIT
     ;;
   after)
     [[ -f $LEGACY_DB ]] || { echo "missing $LEGACY_DB; run '$0 before' first" >&2; exit 1; }
-    ssh-keygen -R "$PI" >/dev/null 2>&1 || true
+    # The new OS has new host keys; ssh also records them by IP, so forget both.
+    for host in "$PI" $(dig +short "$PI"); do
+      ssh-keygen -R "$host" >/dev/null 2>&1 || true
+    done
     echo "Waiting for $PI to accept SSH..."
     until ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=accept-new "$PI" true 2>/dev/null; do sleep 5; done
     scp "$LEGACY_DB" "$PI:speedmonitor-legacy.db"
